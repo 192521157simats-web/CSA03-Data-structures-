@@ -1,0 +1,90 @@
+#include <stdio.h>
+
+#define TABLE_SIZE 10
+
+int hashTable[TABLE_SIZE];
+int isOccupied[TABLE_SIZE] = {0};
+
+int hashFunction(int key) {
+    return key % TABLE_SIZE;
+}
+
+void insert(int key) {
+    int index = hashFunction(key);
+    int originalIndex = index;
+    int probes = 0;
+
+    while (isOccupied[index] && probes < TABLE_SIZE) {
+        index = (index + 1) % TABLE_SIZE;
+        probes++;
+    }
+
+    if (probes == TABLE_SIZE) {
+        printf("Hash table is full. Cannot insert %d.\n", key);
+        return;
+    }
+
+    hashTable[index] = key;
+    isOccupied[index] = 1;
+
+    if (index == originalIndex)
+        printf("Key %d inserted at index %d.\n", key, index);
+    else
+        printf("Key %d inserted at index %d (collision resolved by linear probing).\n", key, index);
+}
+
+int search(int key) {
+    int index = hashFunction(key);
+    int originalIndex = index;
+    int probes = 0;
+
+    while (probes < TABLE_SIZE) {
+        if (isOccupied[index] && hashTable[index] == key)
+            return index;
+        index = (index + 1) % TABLE_SIZE;
+        probes++;
+        if (index == originalIndex)
+            break;
+    }
+    return -1;
+}
+
+void display() {
+    printf("\nHash Table:\n");
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        if (isOccupied[i])
+            printf("Index %d: %d\n", i, hashTable[i]);
+        else
+            printf("Index %d: --\n", i);
+    }
+}
+
+int main() {
+    int n, key, choice;
+
+    printf("Enter number of keys to insert: ");
+    scanf("%d", &n);
+
+    printf("Enter %d keys:\n", n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &key);
+        insert(key);
+    }
+
+    display();
+
+    printf("\nDo you want to search a key? (1-Yes / 0-No): ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        printf("Enter key to search: ");
+        scanf("%d", &key);
+        int pos = search(key);
+        if (pos != -1)
+            printf("Key %d found at index %d.\n", key, pos);
+        else
+            printf("Key %d not found.\n", key);
+    }
+
+    return 0;
+}
